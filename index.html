@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>typo.js — Anatomía computacional de la letra</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@8..144,100..700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --wght: 420;
+        --opsz: 48;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: #09131e;
+        color: #9cc9e6;
+        font-family: 'Google Sans Flex', 'Inter', 'Segoe UI', sans-serif;
+      }
+      .hero {
+        position: relative;
+        min-height: 100vh;
+        overflow: hidden;
+      }
+      #hero-canvas {
+        position: absolute;
+        inset: 0;
+      }
+      .overlay {
+        position: relative;
+        z-index: 2;
+        padding: clamp(1rem, 3vw, 2rem);
+        max-width: 70rem;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 8vw, 7rem);
+        line-height: 0.95;
+        color: #d9f2ff;
+        letter-spacing: 0.02em;
+        font-variation-settings: 'wght' var(--wght), 'opsz' var(--opsz);
+      }
+      .descriptor {
+        margin-top: 0.65rem;
+        margin-bottom: 0;
+        font-size: clamp(0.95rem, 2vw, 1.3rem);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: #7db8da;
+      }
+      .synopsis {
+        margin-top: 1rem;
+        max-width: 46ch;
+        color: #a7c8dd;
+      }
+      .mode-buttons {
+        margin-top: 1.2rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+      }
+      .mode-button {
+        border: 1px solid #35607c;
+        background: rgba(13, 30, 44, 0.6);
+        color: #9fc8dd;
+        padding: 0.38rem 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 0.72rem;
+        cursor: pointer;
+      }
+      .mode-button.active {
+        border-color: #8ad6ff;
+        color: #d9f2ff;
+        background: rgba(22, 56, 78, 0.7);
+      }
+      .hud {
+        margin-top: 1rem;
+        display: inline-block;
+        border: 1px solid #2f5f7c;
+        background: rgba(9, 20, 32, 0.7);
+        padding: 0.5rem 0.65rem;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+      }
+      a {
+        color: #9ad8ff;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/p5@latest/lib/p5.min.js"></script>
+  </head>
+  <body>
+    <main class="hero">
+      <div class="overlay">
+        <h1>typo.js</h1>
+        <p class="descriptor">Anatomía computacional de la letra</p>
+        <p class="synopsis">
+          Exploración de formas tipográficas mediante programación creativa,
+          representación visual y sistemas interactivos.
+        </p>
+        <div class="mode-buttons" id="modes"></div>
+        <div class="hud" id="hud"></div>
+      </div>
+      <div id="hero-canvas"></div>
+    </main>
+    <script>
+      const MODES = ['Outline', 'Points', 'Raster', 'Variable'];
+      let blueprint;
+      let typography;
+      let modeIndex = 0;
+      let hoveredNode = null;
+
+      class BlueprintGrid {
+        draw() {
+          background(8, 18, 28);
+          stroke(23, 51, 70, 95);
+          strokeWeight(1);
+          const major = 56;
+          const minor = 14;
+          for (let x = 0; x < width; x += minor) {
+            stroke(x % major === 0 ? color(35, 83, 110, 130) : color(20, 45, 62, 80));
+            line(x, 0, x, height);
+          }
+          for (let y = 0; y < height; y += minor) {
+            stroke(y % major === 0 ? color(35, 83, 110, 130) : color(20, 45, 62, 80));
+            line(0, y, width, y);
+          }
+        }
+      }
+
+      class NodePoint {
+        constructor(x, y) {
+          this.base = createVector(x, y);
+          this.pos = createVector(x, y);
+          this.phase = random(TWO_PI);
+        }
+
+        update(variableAmount) {
+          const mouse = createVector(mouseX, mouseY);
+          const dir = p5.Vector.sub(this.pos, mouse);
+          const d = dir.mag();
+          const forceRadius = 110;
+          const n = p5.Vector.sub(this.base, this.pos).mult(0.14);
+          this.pos.add(n);
+          if (d < forceRadius && d > 0.001) {
+            dir.normalize();
+            const power = map(d, 0, forceRadius, 6.5, 0.15);
+            this.pos.add(dir.mult(power));
+          }
+          const wave = sin(frameCount * 0.025 + this.phase) * variableAmount;
+          this.pos.x += wave * 0.12;
+          this.pos.y += wave * 0.08;
+        }
+
+        isHovered() {
+          return dist(mouseX, mouseY, this.pos.x, this.pos.y) < 7;
+        }
+      }
+
+      class TypoSystem {
+        constructor(word) {
+          this.word = word;
+          this.nodes = [];
+          this.wght = 420;
+          this.opsz = 48;
+          this.regenerate();
+        }
+
+        regenerate() {
+          this.nodes = this.sampleWord(this.word);
+        }
+
+        sampleWord(word) {
+          const pg = createGraphics(width, height);
+          const size = min(width * 0.23, 260);
+          pg.pixelDensity(1);
+          pg.clear();
+          pg.noStroke();
+          pg.fill(255);
+          pg.drawingContext.font = `${size}px "Google Sans Flex", "Inter", sans-serif`;
+          pg.drawingContext.textBaseline = 'middle';
+          pg.drawingContext.textAlign = 'left';
+          const x = width * 0.1;
+          const y = height * 0.62;
+          pg.drawingContext.fillText(word, x, y);
+          pg.loadPixels();
+          const pts = [];
+          const step = 5;
+          for (let yy = 2; yy < pg.height - 2; yy += step) {
+            for (let xx = 2; xx < pg.width - 2; xx += step) {
+              const alpha = pg.pixels[(yy * pg.width + xx) * 4 + 3];
+              if (alpha === 0) continue;
+              const top = pg.pixels[((yy - 1) * pg.width + xx) * 4 + 3];
+              const right = pg.pixels[(yy * pg.width + (xx + 1)) * 4 + 3];
+              const bottom = pg.pixels[((yy + 1) * pg.width + xx) * 4 + 3];
+              const left = pg.pixels[(yy * pg.width + (xx - 1)) * 4 + 3];
+              if (top === 0 || right === 0 || bottom === 0 || left === 0) {
+                pts.push(new NodePoint(xx, yy));
+              }
+            }
+          }
+          return pts.slice(0, 500);
+        }
+
+        update() {
+          const variableAmount = modeIndex === 3 ? map(sin(frameCount * 0.02), -1, 1, 0.6, 2.1) : 0;
+          this.wght = map(sin(frameCount * 0.02), -1, 1, 250, 680);
+          this.opsz = map(cos(frameCount * 0.018), -1, 1, 12, 144);
+          document.documentElement.style.setProperty('--wght', this.wght.toFixed(0));
+          document.documentElement.style.setProperty('--opsz', this.opsz.toFixed(0));
+          for (const n of this.nodes) n.update(variableAmount);
+        }
+
+        drawOutline() {
+          noFill();
+          stroke(112, 197, 243, 110);
+          strokeWeight(1.1);
+          for (let i = 0; i < this.nodes.length; i++) {
+            const a = this.nodes[i].pos;
+            for (let j = i + 1; j < min(this.nodes.length, i + 8); j++) {
+              const b = this.nodes[j].pos;
+              const d = p5.Vector.dist(a, b);
+              if (d < 24) {
+                beginShape();
+                vertex(a.x, a.y);
+                const mx = (a.x + b.x) * 0.5;
+                const my = (a.y + b.y) * 0.5;
+                quadraticVertex(mx, my - 2.5, b.x, b.y);
+                endShape();
+              }
+            }
+          }
+        }
+
+        drawPoints() {
+          hoveredNode = null;
+          stroke(123, 208, 255, 140);
+          for (const n of this.nodes) {
+            if (n.isHovered()) hoveredNode = n;
+            fill(n.isHovered() ? color(164, 237, 255) : color(96, 190, 238));
+            circle(n.pos.x, n.pos.y, n.isHovered() ? 7 : 4);
+            noFill();
+            const h1 = createVector(n.pos.x + 10, n.pos.y + 6);
+            const h2 = createVector(n.pos.x - 10, n.pos.y - 6);
+            stroke(95, 160, 197, 120);
+            line(n.pos.x, n.pos.y, h1.x, h1.y);
+            line(n.pos.x, n.pos.y, h2.x, h2.y);
+            stroke(139, 221, 255, 100);
+            rect(h1.x - 1.5, h1.y - 1.5, 3, 3);
+            rect(h2.x - 1.5, h2.y - 1.5, 3, 3);
+          }
+        }
+
+        drawRaster() {
+          noStroke();
+          const step = 11;
+          for (let y = 0; y < height; y += step) {
+            for (let x = 0; x < width; x += step) {
+              let nearest = 99999;
+              for (const n of this.nodes) {
+                const d = dist(x, y, n.pos.x, n.pos.y);
+                if (d < nearest) nearest = d;
+              }
+              if (nearest < 12) {
+                fill(137, 217, 255, 180);
+                rect(x, y, step - 2, step - 2);
+              } else if (nearest < 22) {
+                fill(72, 129, 160, 140);
+                rect(x + 2, y + 2, step - 5, step - 5);
+              }
+            }
+          }
+        }
+
+        drawVariable() {
+          stroke(123, 205, 255, 125);
+          noFill();
+          for (const n of this.nodes) {
+            circle(n.pos.x, n.pos.y, map(this.wght, 250, 680, 3, 7));
+          }
+          drawingContext.save();
+          drawingContext.font = `${min(width * 0.21, 250)}px "Google Sans Flex", "Inter", sans-serif`;
+          drawingContext.fillStyle = 'rgba(160, 228, 255, 0.18)';
+          drawingContext.textBaseline = 'middle';
+          drawingContext.fillText(this.word, width * 0.1, height * 0.62);
+          drawingContext.restore();
+        }
+
+        drawCurrentMode() {
+          if (modeIndex === 0) this.drawOutline();
+          if (modeIndex === 1) this.drawPoints();
+          if (modeIndex === 2) this.drawRaster();
+          if (modeIndex === 3) this.drawVariable();
+        }
+      }
+
+      function setupModeButtons() {
+        const parent = document.getElementById('modes');
+        MODES.forEach((mode, i) => {
+          const btn = document.createElement('button');
+          btn.className = `mode-button ${i === modeIndex ? 'active' : ''}`;
+          btn.textContent = mode;
+          btn.addEventListener('click', () => {
+            modeIndex = i;
+            updateButtonState();
+          });
+          parent.appendChild(btn);
+        });
+      }
+
+      function updateButtonState() {
+        document.querySelectorAll('.mode-button').forEach((btn, i) => {
+          btn.classList.toggle('active', i === modeIndex);
+        });
+      }
+
+      function setup() {
+        const c = createCanvas(windowWidth, windowHeight);
+        c.parent('hero-canvas');
+        blueprint = new BlueprintGrid();
+        typography = new TypoSystem('typo.js');
+        setupModeButtons();
+      }
+
+      function drawHUD() {
+        const hud = document.getElementById('hud');
+        const n = hoveredNode;
+        const coord = n ? `x:${n.pos.x.toFixed(1)} y:${n.pos.y.toFixed(1)}` : 'hover node: --';
+        hud.textContent = `${MODES[modeIndex]} · nodes:${typography.nodes.length} · ${coord} · wght:${typography.wght.toFixed(0)} opsz:${typography.opsz.toFixed(0)} · teclas 1-4`;
+      }
+
+      function draw() {
+        blueprint.draw();
+        typography.update();
+        typography.drawCurrentMode();
+        drawHUD();
+      }
+
+      function keyPressed() {
+        if (key >= '1' && key <= '4') {
+          modeIndex = int(key) - 1;
+          updateButtonState();
+        }
+      }
+
+      function windowResized() {
+        resizeCanvas(windowWidth, windowHeight);
+        typography.regenerate();
+      }
+    </script>
+  </body>
+</html>
