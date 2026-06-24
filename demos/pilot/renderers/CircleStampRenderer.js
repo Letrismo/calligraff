@@ -1,0 +1,1 @@
+class CircleStampRenderer{render(graphics,stamp){graphics.drawingContext.globalCompositeOperation=stamp.compositeOperation;graphics.noStroke();const c=color(stamp.color);c.setAlpha(stamp.alpha*255);graphics.fill(c);graphics.circle(stamp.x,stamp.y,stamp.size)}}

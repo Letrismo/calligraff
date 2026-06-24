@@ -1,0 +1,1 @@
+const PILOT_CONFIG={canvas:{background:"#0d0d0d"},brush:{name:"Pilot",size:32,spacing:.10,smoothing:.18,colorMode:"solid",color:"#f2f2f0",palette:["#2D1BFF","#B5179E","#FF2E63","#FFB703"],compositeOperation:"source-over",alpha:1}};

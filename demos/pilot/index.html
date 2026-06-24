@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>eQuills / Pilot</title>
+  <link rel="stylesheet" href="./style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.4/lib/p5.min.js"></script>
+  <script src="./config.js"></script>
+  <script src="./core/Sample.js"></script>
+  <script src="./core/Stroke.js"></script>
+  <script src="./core/EQuill.js"></script>
+  <script src="./core/PointerInput.js"></script>
+  <script src="./renderers/CircleStampRenderer.js"></script>
+  <script src="./brushes/Pilot.js"></script>
+  <script src="./sketch.js"></script>
+</head>
+<body>
+  <main id="app"></main>
+  <aside class="panel">
+    <header>
+      <h1>Pilot</h1>
+      <p>Monoline stamp brush</p>
+    </header>
+    <label>Size <span id="sizeValue">32</span><input id="size" type="range" min="8" max="96" value="32" step="1"></label>
+    <label>Spacing <span id="spacingValue">0.10</span><input id="spacing" type="range" min="0.04" max="0.24" value="0.10" step="0.01"></label>
+    <label>Smoothing <span id="smoothingValue">0.18</span><input id="smoothing" type="range" min="0.05" max="0.40" value="0.18" step="0.01"></label>
+    <label>Color mode <select id="colorMode"><option value="solid">solid</option><option value="gradient">gradient</option></select></label>
+    <label>Color <input id="color" type="color" value="#f2f2f0"></label>
+    <label>Palette <input id="palette" value="#2D1BFF,#B5179E,#FF2E63,#FFB703"></label>
+    <label>Composite <select id="composite"><option value="source-over">source-over</option><option value="lighter">lighter</option><option value="multiply">multiply</option><option value="screen">screen</option><option value="overlay">overlay</option><option value="difference">difference</option></select></label>
+    <div class="actions"><button id="clear">Clear</button><button id="save">Save PNG</button></div>
+  </aside>
+</body>
+</html>
