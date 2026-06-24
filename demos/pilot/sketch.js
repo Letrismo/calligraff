@@ -1,1 +1,144 @@
-let layer,pilot,input;function setup(){const c=createCanvas(windowWidth,windowHeight);c.parent("app");pixelDensity(Math.min(window.devicePixelRatio||1,2));layer=createGraphics(width,height);layer.pixelDensity(Math.min(window.devicePixelRatio||1,2));layer.clear();pilot=new Pilot();input=new PointerInput(c.elt,pilot,layer);setupUI()}function draw(){background(PILOT_CONFIG.canvas.background);image(layer,0,0)}function windowResized(){const oldLayer=layer;resizeCanvas(windowWidth,windowHeight);layer=createGraphics(width,height);layer.pixelDensity(Math.min(window.devicePixelRatio||1,2));layer.clear();layer.image(oldLayer,0,0);input.graphics=layer}function setupUI(){const size=document.getElementById("size"),spacing=document.getElementById("spacing"),smoothing=document.getElementById("smoothing"),colorMode=document.getElementById("colorMode"),colorInput=document.getElementById("color"),palette=document.getElementById("palette"),composite=document.getElementById("composite"),sizeValue=document.getElementById("sizeValue"),spacingValue=document.getElementById("spacingValue"),smoothingValue=document.getElementById("smoothingValue");const sync=()=>{const next={size:Number(size.value),spacing:Number(spacing.value),smoothing:Number(smoothing.value),colorMode:colorMode.value,color:colorInput.value,palette:palette.value.split(",").map(v=>v.trim()).filter(Boolean),compositeOperation:composite.value};pilot.setSettings(next);sizeValue.textContent=next.size;spacingValue.textContent=next.spacing.toFixed(2);smoothingValue.textContent=next.smoothing.toFixed(2)};[size,spacing,smoothing,colorMode,colorInput,palette,composite].forEach(el=>el.addEventListener("input",sync));document.getElementById("clear").addEventListener("click",()=>layer.clear());document.getElementById("save").addEventListener("click",()=>saveCanvas("equills-pilot","png"));sync()}
+(() => {
+  let layer;
+  let pilot;
+  let input;
+  let gui;
+  let guiControllers = [];
+
+  const state = {
+    paletteName: "Aurora",
+    background: PILOT_CONFIG.canvas.background,
+    size: PILOT_CONFIG.brush.size,
+    spacing: PILOT_CONFIG.brush.spacing,
+    vertexDensity: Math.round(1 / PILOT_CONFIG.brush.curveStep),
+    curveSmoothing: PILOT_CONFIG.brush.curveSmoothing,
+    smoothingAmount: PILOT_CONFIG.brush.smoothingAmount,
+    simplificationAlgorithm: PILOT_CONFIG.brush.simplificationAlgorithm,
+    simplificationTolerance: PILOT_CONFIG.brush.simplificationTolerance,
+    colorMode: PILOT_CONFIG.brush.colorMode,
+    color: PILOT_CONFIG.brush.color,
+    colorA: PILOT_CONFIG.brush.palette[0],
+    colorB: PILOT_CONFIG.brush.palette[1],
+    colorC: PILOT_CONFIG.brush.palette[2],
+    colorD: PILOT_CONFIG.brush.palette[3],
+    compositeOperation: PILOT_CONFIG.brush.compositeOperation,
+    alpha: PILOT_CONFIG.brush.alpha,
+    clear: () => layer?.clear(),
+    save: () => saveCanvas("equills-pilot", "png")
+  };
+
+  window.setup = () => {
+    const canvas = createCanvas(windowWidth, windowHeight);
+    canvas.parent("app");
+    pixelDensity(Math.min(window.devicePixelRatio || 1, 2));
+
+    layer = createGraphics(width, height);
+    layer.pixelDensity(Math.min(window.devicePixelRatio || 1, 2));
+    layer.clear();
+
+    pilot = new Pilot();
+    input = new PointerInput(canvas.elt, pilot, layer);
+    setupGui();
+    syncBrush();
+  };
+
+  window.draw = () => {
+    background(state.background);
+    image(layer, 0, 0);
+  };
+
+  window.windowResized = () => {
+    const oldLayer = layer;
+    resizeCanvas(windowWidth, windowHeight);
+
+    layer = createGraphics(width, height);
+    layer.pixelDensity(Math.min(window.devicePixelRatio || 1, 2));
+    layer.clear();
+    layer.image(oldLayer, 0, 0);
+    input.graphics = layer;
+  };
+
+  function setupGui() {
+    gui = new lil.GUI({ title: "Pilot" });
+    guiControllers = [];
+    const track = (controller) => {
+      guiControllers.push(controller);
+      return controller;
+    };
+
+    const brush = gui.addFolder("Brush");
+    track(brush.add(state, "size", 8, 96, 1)).name("Size").onChange(syncBrush);
+    track(brush.add(state, "spacing", 0.04, 0.28, 0.01)).name("Spacing").onChange(syncBrush);
+    track(brush.add(state, "alpha", 0.05, 1, 0.01)).name("Alpha").onChange(syncBrush);
+
+    const curve = gui.addFolder("Curve");
+    track(curve.add(state, "vertexDensity", 3, 72, 1)).name("Vertices").onChange(syncBrush);
+    track(curve.add(state, "curveSmoothing", 0, 4, 1)).name("Smooth passes").onChange(syncBrush);
+    track(curve.add(state, "smoothingAmount", 0, 0.48, 0.01)).name("Smooth amount").onChange(syncBrush);
+    track(curve.add(state, "simplificationAlgorithm", {
+      None: "none",
+      "Douglas-Peucker": "douglas-peucker",
+      "Visvalingam-Whyatt": "visvalingam-whyatt"
+    })).name("Reduction").onChange(syncBrush);
+    track(curve.add(state, "simplificationTolerance", 0, 24, 0.25)).name("Tolerance").onChange(syncBrush);
+
+    const colorFolder = gui.addFolder("Color");
+    track(colorFolder.add(state, "paletteName", Object.keys(PILOT_PALETTES))).name("Palette").onChange(applyPalette);
+    track(colorFolder.add(state, "colorMode", ["solid", "gradient"])).name("Mode").onChange(syncBrush);
+    track(colorFolder.addColor(state, "color")).name("Solid").onChange(syncBrush);
+    track(colorFolder.addColor(state, "colorA")).name("Stop 1").onChange(syncBrush);
+    track(colorFolder.addColor(state, "colorB")).name("Stop 2").onChange(syncBrush);
+    track(colorFolder.addColor(state, "colorC")).name("Stop 3").onChange(syncBrush);
+    track(colorFolder.addColor(state, "colorD")).name("Stop 4").onChange(syncBrush);
+    track(colorFolder.add(state, "compositeOperation", [
+      "source-over",
+      "lighter",
+      "multiply",
+      "screen",
+      "overlay",
+      "difference"
+    ])).name("Composite").onChange(syncBrush);
+
+    const canvasFolder = gui.addFolder("Canvas");
+    track(canvasFolder.addColor(state, "background")).name("Background");
+    track(canvasFolder.add(state, "clear")).name("Clear");
+    track(canvasFolder.add(state, "save")).name("Save PNG");
+  }
+
+  function applyPalette(name) {
+    const palette = PILOT_PALETTES[name];
+
+    if (!palette) return;
+
+    state.background = palette.background;
+    state.compositeOperation = palette.compositeOperation;
+    [state.colorA, state.colorB, state.colorC, state.colorD] = palette.colors;
+    state.colorMode = "gradient";
+    refreshGui();
+    syncBrush();
+  }
+
+  function syncBrush() {
+    if (!pilot) return;
+
+    // The brush receives only rendering settings; canvas state stays in this sketch.
+    pilot.setSettings({
+      size: state.size,
+      spacing: state.spacing,
+      curveStep: 1 / state.vertexDensity,
+      curveSmoothing: state.curveSmoothing,
+      smoothingAmount: state.smoothingAmount,
+      simplificationAlgorithm: state.simplificationAlgorithm,
+      simplificationTolerance: state.simplificationTolerance,
+      colorMode: state.colorMode,
+      color: state.color,
+      palette: [state.colorA, state.colorB, state.colorC, state.colorD],
+      compositeOperation: state.compositeOperation,
+      alpha: state.alpha
+    });
+  }
+
+  function refreshGui() {
+    guiControllers.forEach((controller) => controller.updateDisplay());
+  }
+})();
