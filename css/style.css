@@ -8,6 +8,8 @@
   --color-surface-strong: #171717;
   --color-border: rgba(242, 242, 240, 0.16);
   --color-accent: #f2f2f0;
+  --app-width: 100vw;
+  --app-height: 100dvh;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -20,8 +22,8 @@
 html,
 body {
   margin: 0;
-  width: 100%;
-  height: 100%;
+  width: var(--app-width);
+  height: var(--app-height);
   overflow: hidden;
   background: var(--color-canvas);
   color: var(--color-text);
@@ -33,6 +35,11 @@ body {
 body {
   position: fixed;
   inset: 0;
+}
+
+:fullscreen,
+:-webkit-full-screen {
+  background: var(--color-canvas);
 }
 
 canvas {
@@ -51,13 +58,14 @@ noscript {
 .app-shell,
 .canvas-stage,
 .canvas-mount {
-  min-width: 100%;
-  min-height: 100%;
+  width: var(--app-width);
+  height: var(--app-height);
 }
 
 .canvas-stage {
   position: fixed;
   inset: 0;
+  overflow: hidden;
 }
 
 .app-actions,
@@ -70,7 +78,7 @@ noscript {
 }
 
 .app-actions {
-  inset: auto auto var(--space-4) var(--space-4);
+  inset: auto auto calc(var(--space-4) + env(safe-area-inset-bottom)) calc(var(--space-4) + env(safe-area-inset-left));
 }
 
 .action-button,
@@ -157,12 +165,12 @@ noscript {
 
 @media (max-width: 720px) {
   .lil-gui.root {
-    max-height: 58dvh;
+    max-height: min(58dvh, calc(var(--app-height) - 96px));
     margin: var(--space-3);
   }
 
   .app-actions {
-    inset: auto var(--space-3) var(--space-3) var(--space-3);
+    inset: auto calc(var(--space-3) + env(safe-area-inset-right)) calc(var(--space-3) + env(safe-area-inset-bottom)) calc(var(--space-3) + env(safe-area-inset-left));
   }
 
   .key-hint {

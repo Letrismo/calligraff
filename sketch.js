@@ -27,7 +27,8 @@
   };
 
   window.setup = () => {
-    const canvas = createCanvas(windowWidth, windowHeight);
+    const viewport = window.EQuillsUI?.viewportSize?.() || { width: windowWidth, height: windowHeight };
+    const canvas = createCanvas(viewport.width, viewport.height);
     canvas.parent("app");
     pixelDensity(Math.min(window.devicePixelRatio || 1, 2));
 
@@ -49,7 +50,8 @@
 
   window.windowResized = () => {
     const oldLayer = layer;
-    resizeCanvas(windowWidth, windowHeight);
+    const viewport = window.EQuillsUI?.viewportSize?.() || { width: windowWidth, height: windowHeight };
+    resizeCanvas(viewport.width, viewport.height);
 
     layer = createGraphics(width, height);
     layer.pixelDensity(Math.min(window.devicePixelRatio || 1, 2));
