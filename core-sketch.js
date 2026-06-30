@@ -13,8 +13,7 @@
     smoothingAmount: 0.22,
     simplificationAlgorithm: "none",
     simplificationTolerance: 0,
-    clear: () => layer?.clear(),
-    save: () => saveCanvas("equills-core", "png")
+    clear: () => layer?.clear()
   };
 
   class CoreLineQuill extends EQuill {
@@ -87,6 +86,7 @@
     coreQuill = new CoreLineQuill(currentSettings());
     input = new PointerInput(canvas.elt, coreQuill, layer);
     setupGui();
+    window.EQuillsUI?.bindSurfaceActions({ onErase: state.clear });
   };
 
   window.draw = () => {
@@ -124,7 +124,6 @@
 
     const actions = gui.addFolder("Canvas");
     actions.add(state, "clear").name("Clear");
-    actions.add(state, "save").name("Save PNG");
   }
 
   function currentSettings() {

@@ -23,8 +23,7 @@
     colorD: PILOT_CONFIG.brush.palette[3],
     compositeOperation: PILOT_CONFIG.brush.compositeOperation,
     alpha: PILOT_CONFIG.brush.alpha,
-    clear: () => layer?.clear(),
-    save: () => saveCanvas("equills-pilot", "png")
+    clear: () => layer?.clear()
   };
 
   window.setup = () => {
@@ -39,6 +38,7 @@
     pilot = new Pilot();
     input = new PointerInput(canvas.elt, pilot, layer);
     setupGui();
+    window.EQuillsUI?.bindSurfaceActions({ onErase: state.clear });
     syncBrush();
   };
 
@@ -102,7 +102,6 @@
     const canvasFolder = gui.addFolder("Canvas");
     track(canvasFolder.addColor(state, "background")).name("Background");
     track(canvasFolder.add(state, "clear")).name("Clear");
-    track(canvasFolder.add(state, "save")).name("Save PNG");
   }
 
   function applyPalette(name) {

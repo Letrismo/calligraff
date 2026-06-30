@@ -16,6 +16,11 @@
     <section class="canvas-stage" aria-label="Lienzo de dibujo">
       <div id="app" class="canvas-mount"></div>
     </section>
+    <div class="app-actions" aria-label="Acciones del lienzo">
+      <button class="action-button action-button--icon" type="button" data-action="fullscreen" aria-label="Pantalla completa" title="Pantalla completa"></button>
+      <button class="action-button" type="button" data-action="erase">Erase</button>
+      <span class="key-hint"><kbd>ESC</kbd></span>
+    </div>
   </main>
   <noscript>Activa JavaScript para usar la demo interactiva de eQuills.</noscript>
   <!-- Runtime libraries -->
@@ -30,6 +35,7 @@
   <script defer src="./core/PointerInput.js"></script>
   <script defer src="./renderers/CircleStampRenderer.js"></script>
   <script defer src="./brushes/Pilot.js"></script>
+  <script defer src="./ui-actions.js"></script>
   <script defer src="./sketch.js"></script>
 </body>
 </html>
