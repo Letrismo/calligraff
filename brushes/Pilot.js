@@ -76,7 +76,7 @@ class Pilot extends EQuill {
 
       const x = lerp(from.x, to.x, progress);
       const y = lerp(from.y, to.y, progress);
-      const pressure = this.resolvePressure(from, to, progress);
+      const pressure = this.resolveRenderPressure(this.resolvePressure(from, to, progress));
       this.gradientDistance += spacing;
       this.renderer.render(graphics, {
         x,
@@ -117,6 +117,27 @@ class Pilot extends EQuill {
     const toPressure = Number.isFinite(to.pressure) ? to.pressure : fromPressure;
 
     return Math.min(1, Math.max(0, fromPressure + (toPressure - fromPressure) * progress));
+  }
+
+  resolveRenderPressure(rawPressure) {
+    if (this.settings.pressureEnabled === false) return 0.5;
+
+    if (this.settings.pressureOverrideEnabled) {
+      return this.clampPressure(this.settings.pressureOverride);
+    }
+
+    const pressure = this.clampPressure(rawPressure);
+    const gamma = Math.max(0.1, Number(this.settings.pressureGamma) || 1);
+
+    return this.clampPressure(Math.pow(pressure, gamma));
+  }
+
+  clampPressure(value) {
+    const pressure = Number(value);
+
+    if (!Number.isFinite(pressure)) return 0.5;
+
+    return Math.min(1, Math.max(0, pressure));
   }
 
   catmullRom(p0, p1, p2, p3, t) {

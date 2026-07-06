@@ -29,11 +29,39 @@ class PressureInput {
   }
 
   resolve(event) {
+    return this.detail(event).pressure;
+  }
+
+  detail(event) {
     const nativePressure = PressureInput.nativePressure(event);
 
-    if (nativePressure !== null) return nativePressure;
-    if (Number.isFinite(this.force)) return this.force;
-    return 0.5;
+    if (nativePressure !== null) {
+      return {
+        pressure: nativePressure,
+        source: "pointer",
+        nativePressure,
+        pressureJsForce: this.force,
+        pointerType: event?.pointerType || ""
+      };
+    }
+
+    if (Number.isFinite(this.force)) {
+      return {
+        pressure: this.force,
+        source: this.source,
+        nativePressure: null,
+        pressureJsForce: this.force,
+        pointerType: event?.pointerType || ""
+      };
+    }
+
+    return {
+      pressure: 0.5,
+      source: "default",
+      nativePressure: null,
+      pressureJsForce: null,
+      pointerType: event?.pointerType || ""
+    };
   }
 
   resolveNativePressure(event) {

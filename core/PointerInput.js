@@ -1,8 +1,9 @@
 class PointerInput {
-  constructor(canvasElement, quill, graphics) {
+  constructor(canvasElement, quill, graphics, options = {}) {
     this.canvas = canvasElement;
     this.quill = quill;
     this.graphics = graphics;
+    this.onSample = options.onSample || null;
     this.activePointerId = null;
     this.pressureInput = new PressureInput(canvasElement);
     this.bind();
@@ -17,7 +18,11 @@ class PointerInput {
 
   sample(event) {
     const rect = this.canvas.getBoundingClientRect();
-    return new Sample(event, rect, this.pressureInput.resolve(event));
+    const pressure = this.pressureInput.detail(event);
+    const sample = new Sample(event, rect, pressure.pressure);
+    sample.inputPressure = pressure;
+    this.onSample?.(sample, pressure, event);
+    return sample;
   }
 
   handleDown(event) {

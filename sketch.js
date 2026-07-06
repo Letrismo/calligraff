@@ -4,13 +4,24 @@
   let input;
   let gui;
   let guiControllers = [];
+  let pressureReadout;
+  let lastPressureGuiUpdate = 0;
 
   const state = {
     paletteName: "Aurora",
     background: PILOT_CONFIG.canvas.background,
     size: PILOT_CONFIG.brush.size,
+    pressureEnabled: PILOT_CONFIG.brush.pressureEnabled,
     pressureMinScale: PILOT_CONFIG.brush.pressureMinScale,
     pressureMaxScale: PILOT_CONFIG.brush.pressureMaxScale,
+    pressureGamma: PILOT_CONFIG.brush.pressureGamma,
+    pressureOverrideEnabled: PILOT_CONFIG.brush.pressureOverrideEnabled,
+    pressureOverride: PILOT_CONFIG.brush.pressureOverride,
+    pressurePointer: "-",
+    pressureSource: "-",
+    pressureRaw: "-",
+    pressureApplied: "-",
+    pressureTilt: "-",
     spacing: PILOT_CONFIG.brush.spacing,
     vertexDensity: Math.round(1 / PILOT_CONFIG.brush.curveStep),
     curveSmoothing: PILOT_CONFIG.brush.curveSmoothing,
@@ -39,7 +50,8 @@
     layer.clear();
 
     pilot = new Pilot();
-    input = new PointerInput(canvas.elt, pilot, layer);
+    pressureReadout = document.getElementById("pressure-readout");
+    input = new PointerInput(canvas.elt, pilot, layer, { onSample: updatePressureDebug });
     setupGui();
     window.EQuillsUI?.bindSurfaceActions({ onErase: state.clear });
     syncBrush();
@@ -74,6 +86,19 @@
     track(brush.add(state, "size", 8, 96, 1)).name("Size").onChange(syncBrush);
     track(brush.add(state, "spacing", 0.04, 0.28, 0.01)).name("Spacing").onChange(syncBrush);
     track(brush.add(state, "alpha", 0.05, 1, 0.01)).name("Alpha").onChange(syncBrush);
+
+    const pressure = gui.addFolder("Pressure");
+    track(pressure.add(state, "pressureEnabled")).name("Enabled").onChange(syncBrush);
+    track(pressure.add(state, "pressureMinScale", 0.05, 1, 0.01)).name("Min scale").onChange(syncBrush);
+    track(pressure.add(state, "pressureMaxScale", 1, 4, 0.01)).name("Max scale").onChange(syncBrush);
+    track(pressure.add(state, "pressureGamma", 0.25, 3, 0.01)).name("Response").onChange(syncBrush);
+    track(pressure.add(state, "pressureOverrideEnabled")).name("Test mode").onChange(syncBrush);
+    track(pressure.add(state, "pressureOverride", 0, 1, 0.01)).name("Test pressure").onChange(syncBrush);
+    track(pressure.add(state, "pressurePointer")).name("Pointer").listen();
+    track(pressure.add(state, "pressureSource")).name("Source").listen();
+    track(pressure.add(state, "pressureRaw")).name("Raw").listen();
+    track(pressure.add(state, "pressureApplied")).name("Applied").listen();
+    track(pressure.add(state, "pressureTilt")).name("Tilt").listen();
 
     const curve = gui.addFolder("Curve");
     track(curve.add(state, "vertexDensity", 3, 72, 1)).name("Vertices").onChange(syncBrush);
@@ -127,8 +152,12 @@
     // The brush receives only rendering settings; canvas state stays in this sketch.
     pilot.setSettings({
       size: state.size,
+      pressureEnabled: state.pressureEnabled,
       pressureMinScale: state.pressureMinScale,
       pressureMaxScale: state.pressureMaxScale,
+      pressureGamma: state.pressureGamma,
+      pressureOverrideEnabled: state.pressureOverrideEnabled,
+      pressureOverride: state.pressureOverride,
       spacing: state.spacing,
       curveStep: 1 / state.vertexDensity,
       curveSmoothing: state.curveSmoothing,
@@ -145,5 +174,52 @@
 
   function refreshGui() {
     guiControllers.forEach((controller) => controller.updateDisplay());
+  }
+
+  function updatePressureDebug(sample, pressure) {
+    state.pressurePointer = sample.pointerType || pressure.pointerType || "-";
+    state.pressureSource = pressure.source || "-";
+    state.pressureRaw = formatPressure(pressure.nativePressure ?? pressure.pressureJsForce ?? sample.pressure);
+    state.pressureApplied = formatPressure(resolveAppliedPressure(sample.pressure));
+    state.pressureTilt = formatTilt(sample);
+    updatePressureReadout();
+
+    const now = performance.now();
+    if (now - lastPressureGuiUpdate < 80) return;
+
+    lastPressureGuiUpdate = now;
+    refreshGui();
+  }
+
+  function resolveAppliedPressure(rawPressure) {
+    if (!state.pressureEnabled) return 0.5;
+    if (state.pressureOverrideEnabled) return clampPressure(state.pressureOverride);
+
+    return clampPressure(Math.pow(clampPressure(rawPressure), Math.max(0.1, Number(state.pressureGamma) || 1)));
+  }
+
+  function clampPressure(value) {
+    const pressure = Number(value);
+
+    if (!Number.isFinite(pressure)) return 0.5;
+
+    return Math.min(1, Math.max(0, pressure));
+  }
+
+  function formatPressure(value) {
+    return Number.isFinite(value) ? value.toFixed(3) : "-";
+  }
+
+  function formatTilt(sample) {
+    const tiltX = Number.isFinite(sample.tiltX) ? sample.tiltX : 0;
+    const tiltY = Number.isFinite(sample.tiltY) ? sample.tiltY : 0;
+
+    return `${tiltX.toFixed(0)}, ${tiltY.toFixed(0)}`;
+  }
+
+  function updatePressureReadout() {
+    if (!pressureReadout) return;
+
+    pressureReadout.textContent = `Pressure ${state.pressureApplied} | raw ${state.pressureRaw} | ${state.pressurePointer}/${state.pressureSource}`;
   }
 })();
