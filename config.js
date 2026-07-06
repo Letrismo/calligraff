@@ -37,14 +37,14 @@ const PILOT_CONFIG = {
   },
   brush: {
     name: "Pilot",
-    size: 32,
+    size: 89,
     pressureEnabled: true,
     pressureMinScale: 0.35,
     pressureMaxScale: 1.65,
     pressureGamma: 1,
     pressureOverrideEnabled: false,
     pressureOverride: 0.5,
-    spacing: 0.1,
+    spacing: 0.04,
     curveStep: 0.12,
     curveSmoothing: 1,
     smoothingAmount: 0.24,
@@ -54,6 +54,6 @@ const PILOT_CONFIG = {
     color: "#f2f2f0",
     palette: [...PILOT_PALETTES.Aurora.colors],
     compositeOperation: PILOT_PALETTES.Aurora.compositeOperation,
-    alpha: 1
+    alpha: 0.06
   }
 };
