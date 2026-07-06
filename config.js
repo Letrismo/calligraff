@@ -23,6 +23,8 @@ const PILOT_CONFIG = {
   brush: {
     name: "Pilot",
     size: 32,
+    pressureMinScale: 0.35,
+    pressureMaxScale: 1.65,
     spacing: 0.1,
     curveStep: 0.12,
     curveSmoothing: 1,

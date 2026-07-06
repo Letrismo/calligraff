@@ -9,6 +9,8 @@
     paletteName: "Aurora",
     background: PILOT_CONFIG.canvas.background,
     size: PILOT_CONFIG.brush.size,
+    pressureMinScale: PILOT_CONFIG.brush.pressureMinScale,
+    pressureMaxScale: PILOT_CONFIG.brush.pressureMaxScale,
     spacing: PILOT_CONFIG.brush.spacing,
     vertexDensity: Math.round(1 / PILOT_CONFIG.brush.curveStep),
     curveSmoothing: PILOT_CONFIG.brush.curveSmoothing,
@@ -125,6 +127,8 @@
     // The brush receives only rendering settings; canvas state stays in this sketch.
     pilot.setSettings({
       size: state.size,
+      pressureMinScale: state.pressureMinScale,
+      pressureMaxScale: state.pressureMaxScale,
       spacing: state.spacing,
       curveStep: 1 / state.vertexDensity,
       curveSmoothing: state.curveSmoothing,

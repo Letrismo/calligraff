@@ -7,6 +7,8 @@
     background: "#0d0d0d",
     color: "#f2f2f0",
     lineWidth: 4,
+    pressureMinScale: 0.35,
+    pressureMaxScale: 1.65,
     alpha: 0.86,
     vertexDensity: 10,
     curveSmoothing: 1,
@@ -24,7 +26,7 @@
 
     begin(sample) {
       super.begin(sample);
-      this.lastRendered = { x: sample.x, y: sample.y };
+      this.lastRendered = { x: sample.x, y: sample.y, pressure: sample.pressure };
     }
 
     renderIncrement(graphics) {
@@ -34,17 +36,21 @@
 
       const line = points.length >= 4
         ? [this.lastRendered, ...this.buildCurveSegment(...points)]
-        : [this.lastRendered, { x: points[points.length - 1].x, y: points[points.length - 1].y }];
+        : [this.lastRendered, {
+          x: points[points.length - 1].x,
+          y: points[points.length - 1].y,
+          pressure: points[points.length - 1].pressure
+        }];
       const processed = PathProcessing.process(line, this.settings);
 
       graphics.drawingContext.globalCompositeOperation = "source-over";
       graphics.noFill();
-      graphics.strokeWeight(this.settings.lineWidth);
       const strokeColor = color(this.settings.color);
       strokeColor.setAlpha(this.settings.alpha * 255);
       graphics.stroke(strokeColor);
 
       for (let i = 1; i < processed.length; i += 1) {
+        graphics.strokeWeight(this.resolveWidth(processed[i - 1], processed[i]));
         graphics.line(processed[i - 1].x, processed[i - 1].y, processed[i].x, processed[i].y);
       }
 
@@ -69,8 +75,25 @@
 
       return {
         x: 0.5 * (2 * p1.x + (-p0.x + p2.x) * t + (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 + (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3),
-        y: 0.5 * (2 * p1.y + (-p0.y + p2.y) * t + (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 + (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3)
+        y: 0.5 * (2 * p1.y + (-p0.y + p2.y) * t + (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 + (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3),
+        pressure: this.resolvePressure(p1, p2, t)
       };
+    }
+
+    resolveWidth(from, to) {
+      const pressure = this.resolvePressure(from, to, 0.5);
+      const minScale = Number.isFinite(this.settings.pressureMinScale) ? this.settings.pressureMinScale : 1;
+      const maxScale = Number.isFinite(this.settings.pressureMaxScale) ? this.settings.pressureMaxScale : 1;
+      const pressureScale = minScale + (maxScale - minScale) * pressure;
+
+      return Math.max(1, this.settings.lineWidth * pressureScale);
+    }
+
+    resolvePressure(from, to, progress) {
+      const fromPressure = Number.isFinite(from.pressure) ? from.pressure : 0.5;
+      const toPressure = Number.isFinite(to.pressure) ? to.pressure : fromPressure;
+
+      return Math.min(1, Math.max(0, fromPressure + (toPressure - fromPressure) * progress));
     }
   }
 
@@ -131,6 +154,8 @@
   function currentSettings() {
     return {
       lineWidth: state.lineWidth,
+      pressureMinScale: state.pressureMinScale,
+      pressureMaxScale: state.pressureMaxScale,
       color: state.color,
       alpha: state.alpha,
       curveStep: 1 / state.vertexDensity,

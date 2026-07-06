@@ -24,7 +24,13 @@ class PathProcessing {
   }
 
   static copyPoint(point) {
-    return { x: point.x, y: point.y };
+    const next = { x: point.x, y: point.y };
+
+    if (Number.isFinite(point.pressure)) {
+      next.pressure = Math.min(1, Math.max(0, point.pressure));
+    }
+
+    return next;
   }
 
   static chaikin(points, amount = 0.25) {
@@ -35,18 +41,28 @@ class PathProcessing {
     for (let i = 0; i < points.length - 1; i += 1) {
       const a = points[i];
       const b = points[i + 1];
-      next.push({
-        x: a.x + (b.x - a.x) * amount,
-        y: a.y + (b.y - a.y) * amount
-      });
-      next.push({
-        x: a.x + (b.x - a.x) * (1 - amount),
-        y: a.y + (b.y - a.y) * (1 - amount)
-      });
+      next.push(PathProcessing.interpolatePoint(a, b, amount));
+      next.push(PathProcessing.interpolatePoint(a, b, 1 - amount));
     }
 
     next.push(PathProcessing.copyPoint(points[points.length - 1]));
     return next;
+  }
+
+  static interpolatePoint(a, b, amount) {
+    const next = {
+      x: a.x + (b.x - a.x) * amount,
+      y: a.y + (b.y - a.y) * amount
+    };
+    const pressureA = PathProcessing.pointPressure(a);
+    const pressureB = PathProcessing.pointPressure(b);
+
+    next.pressure = pressureA + (pressureB - pressureA) * amount;
+    return next;
+  }
+
+  static pointPressure(point) {
+    return Number.isFinite(point.pressure) ? Math.min(1, Math.max(0, point.pressure)) : 0.5;
   }
 
   static douglasPeucker(points, epsilon) {
