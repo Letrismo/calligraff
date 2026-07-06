@@ -5,6 +5,19 @@
 
   const state = {
     background: "#0d0d0d",
+    guidesEnabled: PILOT_CONFIG.canvas.guides.enabled,
+    guideUnitScale: PILOT_CONFIG.canvas.guides.unitScale,
+    guideXHeightRatio: PILOT_CONFIG.canvas.guides.xHeightRatio,
+    guideAscenderRatio: PILOT_CONFIG.canvas.guides.ascenderRatio,
+    guideDescenderRatio: PILOT_CONFIG.canvas.guides.descenderRatio,
+    guideOffsetY: PILOT_CONFIG.canvas.guides.offsetY,
+    guideColor: PILOT_CONFIG.canvas.guides.color,
+    guideBaselineAlpha: PILOT_CONFIG.canvas.guides.baselineAlpha,
+    guideSecondaryAlpha: PILOT_CONFIG.canvas.guides.secondaryAlpha,
+    guideStrokeWeight: PILOT_CONFIG.canvas.guides.strokeWeight,
+    guideSlantEnabled: PILOT_CONFIG.canvas.guides.slantEnabled,
+    guideSlantAngle: PILOT_CONFIG.canvas.guides.slantAngle,
+    guideSlantSpacingScale: PILOT_CONFIG.canvas.guides.slantSpacingScale,
     color: "#f2f2f0",
     lineWidth: 4,
     pressureMinScale: 0.35,
@@ -115,6 +128,7 @@
 
   window.draw = () => {
     background(state.background);
+    CalligraphyGuides.render(guideSettings(state.lineWidth), width, height);
     image(layer, 0, 0);
   };
 
@@ -135,6 +149,21 @@
     gui.addColor(state, "color").name("Stroke").onChange(syncSettings);
     gui.add(state, "lineWidth", 1, 32, 1).name("Width").onChange(syncSettings);
     gui.add(state, "alpha", 0.05, 1, 0.01).name("Alpha").onChange(syncSettings);
+
+    const guides = gui.addFolder("Guides");
+    guides.add(state, "guidesEnabled").name("Enabled");
+    guides.add(state, "guideUnitScale", 0.75, 12, 0.05).name("Width ratio");
+    guides.add(state, "guideXHeightRatio", 0.5, 2.5, 0.05).name("X-height");
+    guides.add(state, "guideAscenderRatio", 0, 2, 0.05).name("Ascender");
+    guides.add(state, "guideDescenderRatio", 0, 2, 0.05).name("Descender");
+    guides.add(state, "guideOffsetY", 0, 240, 1).name("Offset Y");
+    guides.addColor(state, "guideColor").name("Color");
+    guides.add(state, "guideBaselineAlpha", 0, 1, 0.01).name("Baseline alpha");
+    guides.add(state, "guideSecondaryAlpha", 0, 1, 0.01).name("Line alpha");
+    guides.add(state, "guideStrokeWeight", 0.25, 4, 0.25).name("Weight");
+    guides.add(state, "guideSlantEnabled").name("Slant");
+    guides.add(state, "guideSlantAngle", -35, 35, 1).name("Slant angle");
+    guides.add(state, "guideSlantSpacingScale", 0.75, 8, 0.05).name("Slant spacing");
 
     const curve = gui.addFolder("Curve");
     curve.add(state, "vertexDensity", 3, 72, 1).name("Vertices").onChange(syncSettings);
@@ -168,5 +197,24 @@
 
   function syncSettings() {
     coreQuill.setSettings(currentSettings());
+  }
+
+  function guideSettings(nibSize) {
+    return {
+      enabled: state.guidesEnabled,
+      nibSize,
+      unitScale: state.guideUnitScale,
+      xHeightRatio: state.guideXHeightRatio,
+      ascenderRatio: state.guideAscenderRatio,
+      descenderRatio: state.guideDescenderRatio,
+      offsetY: state.guideOffsetY,
+      color: state.guideColor,
+      baselineAlpha: state.guideBaselineAlpha,
+      secondaryAlpha: state.guideSecondaryAlpha,
+      strokeWeight: state.guideStrokeWeight,
+      slantEnabled: state.guideSlantEnabled,
+      slantAngle: state.guideSlantAngle,
+      slantSpacingScale: state.guideSlantSpacingScale
+    };
   }
 })();

@@ -18,7 +18,22 @@ const PILOT_PALETTES = {
 
 const PILOT_CONFIG = {
   canvas: {
-    background: PILOT_PALETTES.Aurora.background
+    background: PILOT_PALETTES.Aurora.background,
+    guides: {
+      enabled: true,
+      unitScale: 2.4,
+      xHeightRatio: 1,
+      ascenderRatio: 0.72,
+      descenderRatio: 0.48,
+      offsetY: 48,
+      color: "#8fd3ff",
+      baselineAlpha: 0.34,
+      secondaryAlpha: 0.18,
+      strokeWeight: 1,
+      slantEnabled: true,
+      slantAngle: 12,
+      slantSpacingScale: 2
+    }
   },
   brush: {
     name: "Pilot",

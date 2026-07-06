@@ -10,6 +10,19 @@
   const state = {
     paletteName: "Aurora",
     background: PILOT_CONFIG.canvas.background,
+    guidesEnabled: PILOT_CONFIG.canvas.guides.enabled,
+    guideUnitScale: PILOT_CONFIG.canvas.guides.unitScale,
+    guideXHeightRatio: PILOT_CONFIG.canvas.guides.xHeightRatio,
+    guideAscenderRatio: PILOT_CONFIG.canvas.guides.ascenderRatio,
+    guideDescenderRatio: PILOT_CONFIG.canvas.guides.descenderRatio,
+    guideOffsetY: PILOT_CONFIG.canvas.guides.offsetY,
+    guideColor: PILOT_CONFIG.canvas.guides.color,
+    guideBaselineAlpha: PILOT_CONFIG.canvas.guides.baselineAlpha,
+    guideSecondaryAlpha: PILOT_CONFIG.canvas.guides.secondaryAlpha,
+    guideStrokeWeight: PILOT_CONFIG.canvas.guides.strokeWeight,
+    guideSlantEnabled: PILOT_CONFIG.canvas.guides.slantEnabled,
+    guideSlantAngle: PILOT_CONFIG.canvas.guides.slantAngle,
+    guideSlantSpacingScale: PILOT_CONFIG.canvas.guides.slantSpacingScale,
     size: PILOT_CONFIG.brush.size,
     pressureEnabled: PILOT_CONFIG.brush.pressureEnabled,
     pressureMinScale: PILOT_CONFIG.brush.pressureMinScale,
@@ -59,6 +72,7 @@
 
   window.draw = () => {
     background(state.background);
+    CalligraphyGuides.render(guideSettings(state.size), width, height);
     image(layer, 0, 0);
   };
 
@@ -99,6 +113,21 @@
     track(pressure.add(state, "pressureRaw")).name("Raw").listen();
     track(pressure.add(state, "pressureApplied")).name("Applied").listen();
     track(pressure.add(state, "pressureTilt")).name("Tilt").listen();
+
+    const guides = gui.addFolder("Guides");
+    track(guides.add(state, "guidesEnabled")).name("Enabled");
+    track(guides.add(state, "guideUnitScale", 0.75, 6, 0.05)).name("Size ratio");
+    track(guides.add(state, "guideXHeightRatio", 0.5, 2.5, 0.05)).name("X-height");
+    track(guides.add(state, "guideAscenderRatio", 0, 2, 0.05)).name("Ascender");
+    track(guides.add(state, "guideDescenderRatio", 0, 2, 0.05)).name("Descender");
+    track(guides.add(state, "guideOffsetY", 0, 240, 1)).name("Offset Y");
+    track(guides.addColor(state, "guideColor")).name("Color");
+    track(guides.add(state, "guideBaselineAlpha", 0, 1, 0.01)).name("Baseline alpha");
+    track(guides.add(state, "guideSecondaryAlpha", 0, 1, 0.01)).name("Line alpha");
+    track(guides.add(state, "guideStrokeWeight", 0.25, 4, 0.25)).name("Weight");
+    track(guides.add(state, "guideSlantEnabled")).name("Slant");
+    track(guides.add(state, "guideSlantAngle", -35, 35, 1)).name("Slant angle");
+    track(guides.add(state, "guideSlantSpacingScale", 0.75, 5, 0.05)).name("Slant spacing");
 
     const curve = gui.addFolder("Curve");
     track(curve.add(state, "vertexDensity", 3, 72, 1)).name("Vertices").onChange(syncBrush);
@@ -174,6 +203,25 @@
 
   function refreshGui() {
     guiControllers.forEach((controller) => controller.updateDisplay());
+  }
+
+  function guideSettings(nibSize) {
+    return {
+      enabled: state.guidesEnabled,
+      nibSize,
+      unitScale: state.guideUnitScale,
+      xHeightRatio: state.guideXHeightRatio,
+      ascenderRatio: state.guideAscenderRatio,
+      descenderRatio: state.guideDescenderRatio,
+      offsetY: state.guideOffsetY,
+      color: state.guideColor,
+      baselineAlpha: state.guideBaselineAlpha,
+      secondaryAlpha: state.guideSecondaryAlpha,
+      strokeWeight: state.guideStrokeWeight,
+      slantEnabled: state.guideSlantEnabled,
+      slantAngle: state.guideSlantAngle,
+      slantSpacingScale: state.guideSlantSpacingScale
+    };
   }
 
   function updatePressureDebug(sample, pressure) {
