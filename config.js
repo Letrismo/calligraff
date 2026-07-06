@@ -13,6 +13,16 @@ const PILOT_PALETTES = {
     background: "#0d0d0d",
     compositeOperation: "screen",
     colors: ["#4cc9f0", "#b8f2e6", "#f72585", "#ffd166"]
+  },
+  "Psicotropico": {
+    background: "#05020a",
+    compositeOperation: "lighter",
+    colors: ["#00f5d4", "#f15bb5", "#fee440", "#9b5de5"]
+  },
+  "Acido": {
+    background: "#120016",
+    compositeOperation: "screen",
+    colors: ["#39ff14", "#ff206e", "#fbff12", "#00bbf9"]
   }
 };
 
