@@ -15,14 +15,15 @@ function staticDemoFiles() {
     ["img/pilot.png", "pilot.png"],
   ];
 
-  for (const directory of ["brushes", "core", "renderers"]) {
+  for (const directory of ["js/brushes", "js/core", "js/renderers"]) {
     for (const entry of readdirSync(resolve(projectRoot, directory), {
       recursive: true,
       withFileTypes: true,
     })) {
       if (entry.isFile() && extname(entry.name) === ".js") {
-        const file = relative(projectRoot, resolve(entry.parentPath, entry.name));
-        files.push([file, file]);
+        const sourceFile = relative(projectRoot, resolve(entry.parentPath, entry.name));
+        const outputFile = relative(resolve(projectRoot, "js"), resolve(entry.parentPath, entry.name));
+        files.push([sourceFile, outputFile]);
       }
     }
   }

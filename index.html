@@ -14,34 +14,44 @@
       content="Charlas, live coding y herramientas generativas de escritura en Ciudad de México."
     />
     <title>calligraff.js — Caligrafía y código</title>
-    <link rel="icon" href="./img/icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="./css/style.css" />
   </head>
   <body>
-    <nav aria-label="Navegación principal">
+    <header aria-label="Navegación principal" class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4">
       <a href="#inicio">
         <img src="./img/e-quill-symbol.svg" alt="eQuills logo" width="38"/>
       </a>
-      <a href="#participa">Participa</a>
-      <a href="#contexto">Contexto</a>
-      <a href="#programa">Programa</a>
-      <a href="#about">About</a>
-    </nav>
-    <header id="inicio" class="hero prose prose-invert xl:prose-2xl">
-      <p>
-        <img src="./img/PCD_2026_Logo_Line_White.C3SAYx7o.svg" alt="">
-      </p>
-      <h1>calligraff.js</h1>
-      <p><em>Calligraphy meets code</em></p>
+      <nav>
+        <a class="nav-link" href="#participa">Participa</a>
+        <a class="nav-link" href="#contexto">Contexto</a>
+        <a class="nav-link" href="#programa">Programa</a>
+        <a class="nav-link" href="#about">About</a>
+      </nav>
+    </header>
+    <section id="inicio" class="hero prose prose-invert xl:prose-2xl">
+      <header>
+        <p class="font-bold text-xl">
+          Processing Community Day 
+          <small class="year inline-flex text-xl">
+            <span class="text-green">2</span>
+            <span class="text-yellow">0</span>
+            <span class="text-red">2</span>
+            <span class="text-pink">6</span>
+          </small>
+        </p>
+        <h1 class="text-orange">calligraff.js</h1>
+        <p class="text-3xl font-semibold">Calligraphy Meets Code</p>
+      </header>
       <p>
         Un encuentro dedicado a la escritura, el gesto y las herramientas
         generativas.
       </p>
       <footer>
-        <a href="#participa">Participa</a>
-        <a href="#programa">Conocer más</a>
+        <a class="nav-link" href="#participa">Participa</a>
+        <a class="nav-link" href="#programa">Conoce más</a>
       </footer>
-    </header>
+    </section>
 
     <main class="prose prose-invert xl:prose-2xl ">
       <article>

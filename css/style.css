@@ -2,39 +2,42 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-:root {
+@theme static {
   --font-title: "fayte-pixel-hard", sans-serif;
   --font-body: "space-grotesk-variable", sans-serif;
+
   --color-bg: #121212;
   --color-text: #dedede;
-  --color-link: #007bff;  
-  --green: #198f56;
-  --orange: #ffbf19;
-  --red: #f0577c;
-  --pink: #ef70d3;
-  --white: #fbfbfb;
-  --font-size-h1: 20vw;
-  --font-size-h2: 2rem;
-  --font-size-h3: 2.5rem;
-  --font-size: 1.5rem;
+  --color-link: #007bff;
+  --color-green: #198f56;
+  --color-orange: #ffbf19;
+  --color-red: #f0577c;
+  --color-pink: #ef70d3;
+  --color-white: #fbfbfb;
+
+  --text-body: 1rem;
+  --text-h1: 20vw;
+  --text-h2: 2rem;
+  --text-h3: 2.5rem;
+
+  --leading-body: 1.64;
 }
 
 body {
   font-family: var(--font-body);
-  font-size: var(--font-size);
+  font-size: var(--text-body);
   color: var(--color-text);
   background-color: var(--color-bg);
-  line-height: 1.64;
-}
-
-h1, h2, h3 {
-  font-family: var(--font-title);
-  font-weight: 100;
+  line-height: var(--leading-body);
 }
 
 h1 {
-  font-size: var(--font-size-h1);
-  margin: 0;
+  font-family: var(--font-title);
+  font-weight: 100;
+  line-height: .7em;
+  margin-top: 0;
+  margin-bottom: .3em;
+  font-size: var(--text-h1);
 }
 
 main {
@@ -48,6 +51,10 @@ main {
   padding: 1rem;
   width: 100%;
   max-width: none;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .hero img {
@@ -56,11 +63,23 @@ main {
   margin: 0 auto;
 }
 
-.hero h1 + p {
-  font-size: 2rem;
-}
-
 img {
   max-width: 100%;
   height: auto;
+}
+
+a.nav-link {
+  color: var(--color-green);
+  text-decoration: none;
+  background: var(--color-bg);
+  color: var(--color-text);
+  padding: 0.25em 1em;
+  border: 2px solid currentColor;
+  line-height: 1;
+  margin: 0 0.25em;
+}
+
+a.nav-link:hover {
+  background: var(--color-text);
+  color: var(--color-bg);
 }
