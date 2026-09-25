@@ -7,8 +7,13 @@
   --font-body: "space-grotesk-variable", sans-serif;
   --color-bg: #121212;
   --color-text: #dedede;
-  --color-link: #007bff;
-  --font-size-h1: 6rem;
+  --color-link: #007bff;  
+  --green: #198f56;
+  --orange: #ffbf19;
+  --red: #f0577c;
+  --pink: #ef70d3;
+  --white: #fbfbfb;
+  --font-size-h1: 20vw;
   --font-size-h2: 2rem;
   --font-size-h3: 2.5rem;
   --font-size: 1.5rem;
@@ -22,16 +27,40 @@ body {
   line-height: 1.64;
 }
 
-h1 {
+h1, h2, h3 {
   font-family: var(--font-title);
   font-weight: 100;
 }
 
-h1 { font-size: var(--font-size-h1); }
+h1 {
+  font-size: var(--font-size-h1);
+  margin: 0;
+}
 
 main {
   max-width: 960px;
   margin: 0 auto;
   width: 80%;
-  
+}
+
+.hero {
+  text-align: center;
+  padding: 1rem;
+  width: 100%;
+  max-width: none;
+}
+
+.hero img {
+  width: 90%;
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.hero h1 + p {
+  font-size: 2rem;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
 }
