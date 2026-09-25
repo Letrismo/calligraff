@@ -1,203 +1,37 @@
+@import "https://use.typekit.net/tar7esj.css";
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
 :root {
-  color-scheme: dark;
-  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --color-canvas: #0d0d0d;
-  --color-text: #f2f2f0;
-  --color-muted: #9a9a96;
-  --color-surface: rgba(17, 17, 17, 0.88);
-  --color-surface-strong: #171717;
-  --color-border: rgba(242, 242, 240, 0.16);
-  --color-accent: #f2f2f0;
-  --app-width: 100vw;
-  --app-height: 100dvh;
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --shadow-ui: 0 18px 48px rgba(0, 0, 0, 0.32);
-  --z-controls: 10;
-}
-html,
-body {
-  margin: 0;
-  width: var(--app-width);
-  height: var(--app-height);
-  overflow: hidden;
-  background: var(--color-canvas);
-  color: var(--color-text);
-  font-family: var(--font-sans);
-  touch-action: none;
-  overscroll-behavior: none;
+  --font-title: "fayte-pixel-hard", sans-serif;
+  --font-body: "space-grotesk-variable", sans-serif;
+  --color-bg: #121212;
+  --color-text: #dedede;
+  --color-link: #007bff;
+  --font-size-h1: 6rem;
+  --font-size-h2: 2rem;
+  --font-size-h3: 2.5rem;
+  --font-size: 1.5rem;
 }
 
 body {
-  position: fixed;
-  inset: 0;
-}
-
-:fullscreen,
-:-webkit-full-screen {
-  background: var(--color-canvas);
-}
-
-canvas {
-  display: block;
-  touch-action: none;
-  cursor: crosshair;
-}
-
-noscript {
-  position: fixed;
-  inset: var(--space-4) auto auto var(--space-4);
-  z-index: var(--z-controls);
+  font-family: var(--font-body);
+  font-size: var(--font-size);
   color: var(--color-text);
+  background-color: var(--color-bg);
+  line-height: 1.64;
 }
 
-.app-shell,
-.canvas-stage,
-.canvas-mount {
-  width: var(--app-width);
-  height: var(--app-height);
+h1 {
+  font-family: var(--font-title);
+  font-weight: 100;
 }
 
-.canvas-stage {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
-}
+h1 { font-size: var(--font-size-h1); }
 
-.app-actions,
-.demo-nav {
-  position: fixed;
-  z-index: var(--z-controls);
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.app-actions {
-  inset: auto auto calc(var(--space-4) + env(safe-area-inset-bottom)) calc(var(--space-4) + env(safe-area-inset-left));
-}
-
-.pressure-readout {
-  position: fixed;
-  inset: calc(var(--space-4) + env(safe-area-inset-top)) auto auto calc(var(--space-4) + env(safe-area-inset-left));
-  z-index: var(--z-controls);
-  max-width: min(360px, calc(100vw - 32px));
-  min-height: 32px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  color: var(--color-text);
-  box-shadow: var(--shadow-ui);
-  padding: 0 var(--space-3);
-  font: 600 12px/32px var(--font-sans);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-.action-button,
-.demo-nav a,
-.key-hint {
-  min-height: 36px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  color: var(--color-text);
-  box-shadow: var(--shadow-ui);
-  font: 600 12px/1 var(--font-sans);
-}
-
-.action-button,
-.demo-nav a {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 var(--space-3);
-  cursor: pointer;
-  text-decoration: none;
-}
-
-.action-button:hover,
-.demo-nav a:hover {
-  background: var(--color-surface-strong);
-}
-
-.action-button:focus-visible,
-.demo-nav a:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
-.action-button--icon {
-  width: 36px;
-  padding: 0;
-}
-
-.action-button--icon svg {
-  width: 18px;
-  height: 18px;
-  fill: currentColor;
-}
-
-.key-hint {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: 0 var(--space-3);
-  color: var(--color-muted);
-  font-weight: 500;
-}
-
-.key-hint kbd {
-  color: var(--color-text);
-  font: 700 11px/1 var(--font-sans);
-  letter-spacing: 0;
-}
-
-.demo-nav {
-  inset: var(--space-4) auto auto var(--space-4);
-}
-
-.lil-gui.root {
-  --background-color: var(--color-surface);
-  --text-color: var(--color-text);
-  --title-background-color: var(--color-surface-strong);
-  --title-text-color: var(--color-text);
-  --widget-color: #242424;
-  --hover-color: #303030;
-  --focus-color: #3a3a3a;
-  --number-color: #8fd3ff;
-  --string-color: #ffba7a;
-  --font-family: var(--font-sans);
-  z-index: var(--z-controls);
-  margin: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-ui);
-  overflow: hidden;
-}
-
-@media (max-width: 720px) {
-  .lil-gui.root {
-    max-height: min(58dvh, calc(var(--app-height) - 96px));
-    margin: var(--space-3);
-  }
-
-  .app-actions {
-    inset: auto calc(var(--space-3) + env(safe-area-inset-right)) calc(var(--space-3) + env(safe-area-inset-bottom)) calc(var(--space-3) + env(safe-area-inset-left));
-  }
-
-  .key-hint {
-    flex: 1;
-    justify-content: center;
-  }
-
-  .demo-nav {
-    inset: var(--space-3) auto auto var(--space-3);
-  }
+main {
+  max-width: 960px;
+  margin: 0 auto;
+  width: 80%;
+  
 }
